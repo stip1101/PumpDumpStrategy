@@ -1,0 +1,31 @@
+//@version=4
+strategy("Памп и дамп стратегия", overlay=true)
+
+// Параметры для идентификации пампов и дампов
+pump_threshold = input(2.0, title="Пороговое значение для пампа")
+dump_threshold = input(2.0, title="Пороговое значение для дампа")
+lookback_period = input(20, title="Период для вычисления среднего")
+
+// Вычисление изменения цены на основе среднего значения
+price_change = close - sma(close, lookback_period)
+
+// Определение пампов и дампов
+is_pump = price_change > pump_threshold
+is_dump = price_change < -dump_threshold
+
+// Сигналы
+pump_signal = is_pump ? 1 : 0
+dump_signal = is_dump ? -1 : 0
+
+// Объединение сигналов
+combined_signal = pump_signal + dump_signal
+
+// Открытие и закрытие позиций
+if combined_signal > 0
+    strategy.entry("Pump", strategy.long)
+else if combined_signal < 0
+    strategy.entry("Dump", strategy.short)
+
+if combined_signal == 0
+    strategy.close("Pump")
+    strategy.close("Dump")
